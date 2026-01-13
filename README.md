@@ -60,23 +60,19 @@ pip install pandas sentence_transformers python-docx torch
 1. **Parsing**: `.docx` 문서에서 텍스트 추출 및 섹션 분리.
 2. **Formatting**: 텍스트를 Markdown 형식으로 구조화.
 3. **Embedding**: `nomic-ai` 모델로 벡터화 수행.
-4. 
-**Export**: 결과물을 `CSV`, `JSON`, `TXT(JSONL)` 형식으로 저장.
+4. **Export**: 결과물을 `CSV`, `JSON`, `TXT(JSONL)` 형식으로 저장.
 
 
 
 ## 📂 파일 구조 및 출력
 
-* 
-**`SKT_simple_optimized.json`**: 최적화된 청킹이 적용된 최종 데이터셋.
+* **`SKT_simple_optimized.json`**: 최적화된 청킹이 적용된 최종 데이터셋.
 
 
-* 
-**`KT_plans_final_balanced.json`**: 7개 청크로 균등하게 나뉜 데이터.
+* **`KT_plans_final_balanced.json`**: 7개 청크로 균등하게 나뉜 데이터.
 
 
-* 
-**`LGUplus_plans_final.csv`**: 메타데이터와 벡터값이 포함된 업로드용 파일.
+* **`LGUplus_plans_final.csv`**: 메타데이터와 벡터값이 포함된 업로드용 파일.
 
 
 
@@ -84,10 +80,3 @@ pip install pandas sentence_transformers python-docx torch
 
 **참고**: 임베딩 시 `nomic-ai/nomic-embed-text-v2-moe` 모델의 성능을 위해 GPU(CUDA) 환경을 권장합니다.
 
----
-
-**다음 단계로 무엇을 도와드릴까요?**
-
-* "README에 설치 방법(Installation) 섹션을 더 상세히 추가해줄까?"
-* "작성된 JSON 파일을 Milvus 데이터베이스에 업로드하는 코드를 짜줄까?"
-* "Overlap Size 400이 너무 클 때 발생할 수 있는 문제점을 알려줄까?"
