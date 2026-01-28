@@ -1,0 +1,4 @@
+.env            # API 키 등이 담긴 설정 파일
+__pycache__/    # 파이썬 컴파일 결과물
+venv/           # 가상환경 폴더
+.DS_Store       # Mac 시스템 파일
