@@ -1,4 +1,27 @@
-.env            # API 키 등이 담긴 설정 파일
-__pycache__/    # 파이썬 컴파일 결과물
-venv/           # 가상환경 폴더
-.DS_Store       # Mac 시스템 파일
+# 설정 및 보안
+.env
+*.env
+
+# 가상환경
+.venv/
+venv/
+ENV/
+env/
+
+# 파이썬 캐시 및 컴파일
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS 관련 파일
+.DS_Store
+Thumbs.db
+
+# 로그 및 임시 파일 (추가 추천)
+*.log
+.ipynb_checkpoints/
+
+# 로컬 DB 및 큰 데이터 파일 (필요 시 추가)
+# 만약 로컬에 큰 csv나 sqlite 파일을 저장하신다면 아래를 추가하세요.
+*.csv
+*.db

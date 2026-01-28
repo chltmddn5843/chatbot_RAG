@@ -5,7 +5,7 @@ from openai import OpenAI
 from pymilvus import connections, Collection, utility
 from dotenv import load_dotenv
 
-# [중요] db_utils에서 필요한 함수들을 불러옵니다.
+#db_utils에서 필요한 함수들을 불러옵니다.
 from db_utils import ensure_chatbot_logs_table, save_chat_log, show_recent_logs
 
 # 초기 설정
