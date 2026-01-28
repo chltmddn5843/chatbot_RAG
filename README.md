@@ -6,9 +6,7 @@
 
 **통신사별 맞춤 파싱**: 각 통신사 문서의 특성에 맞춰 `[통신사명]`, `요금제란?`, `[요금제 시작]` 등의 키워드를 기준으로 섹션을 자동 분리합니다.
 
-
 **Markdown 계층화**: 일반 텍스트를 `# (H1)`, `## (H2)`, `### (H3)` 구조로 변환하여 LLM이 데이터의 구조를 더 잘 이해할 수 있도록 전처리합니다.
-
 
 * **다양한 청킹 전략 지원**:
 * **유닛별 분리**: 개별 요금제 단위로 저장.
@@ -19,8 +17,6 @@
 
  
 **고성능 임베딩**: `nomic-embed-text-v2-moe` 모델을 사용하여 텍스트의 의미를 벡터(Dense Vector)로 변환합니다.
-
-
 
 ## ⚙️ 데이터 전처리 설정 (RAG Config)
 
@@ -45,14 +41,11 @@ pip install pandas sentence_transformers python-docx torch
 
 ### 2. 소스 데이터 준비
 
-* 
-`요금제RAG/` 폴더 내에 통신사별 `.docx` 파일을 배치합니다.
-
+* `요금제RAG/` 폴더 내에 통신사별 `.docx` 파일을 배치합니다.
 
 * `SKT요금제정보_251209.docx`
 * `KT요금제정보_251209.docx`
 * `LGU+요금제정보_260102.docx`
-
 
 
 ### 3. 실행 프로세스
@@ -68,9 +61,7 @@ pip install pandas sentence_transformers python-docx torch
 
 * **`SKT_simple_optimized.json`**: 최적화된 청킹이 적용된 최종 데이터셋.
 
-
 * **`KT_plans_final_balanced.json`**: 7개 청크로 균등하게 나뉜 데이터.
-
 
 * **`LGUplus_plans_final.csv`**: 메타데이터와 벡터값이 포함된 업로드용 파일.
 
