@@ -20,8 +20,11 @@ Thumbs.db
 # 로그 및 임시 파일 (추가 추천)
 *.log
 .ipynb_checkpoints/
+logs/
+**/logs/
 
 # 로컬 DB 및 큰 데이터 파일 (필요 시 추가)
 # 만약 로컬에 큰 csv나 sqlite 파일을 저장하신다면 아래를 추가하세요.
 *.csv
 *.db
+

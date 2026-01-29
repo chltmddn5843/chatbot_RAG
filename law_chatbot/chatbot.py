@@ -1,28 +1,37 @@
 import os
 import torch
+import json
 from transformers import AutoTokenizer, AutoModel
 from openai import OpenAI
 from pymilvus import connections, Collection, utility
 from dotenv import load_dotenv
-
-#db_utils에서 필요한 함수들을 불러옵니다.
+from langchain_huggingface import HuggingFaceEmbeddings
+# db_utils에서 필요한 함수들을 불러옵니다.
 from db_utils import ensure_chatbot_logs_table, save_chat_log, show_recent_logs
 
-# 초기 설정
+# 1. 초기 설정 및 환경 변수 로드
 load_dotenv()
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1" # DLL 에러 방지를 위한 CPU 강제 모드
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1" 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+# [.env]에서 huggingfacekey 가져와서 시스템 환경 변수로 설정
+hf_token = os.getenv("huggingfacekey")
+if hf_token:
+    os.environ["HF_TOKEN"] = hf_token # HuggingFace 라이브러리가 자동으로 인식
 
 client = OpenAI(api_key=os.getenv("API_KEY"))
 MILVUS_HOST = os.getenv("MILVUS_HOST", "127.0.0.1")
 MILVUS_COLLECTION = "col_1"
 
-# 모델 로드 (HuggingFace)
+# 2. 모델 로드 (HuggingFace)
+# HF_TOKEN이 설정되어 있으므로 인증된 요청으로 처리됩니다.
 device = "cpu"
 model_name = "nomic-ai/nomic-embed-text-v2-moe"
 tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to(device)
 model.eval()
+
+# 3. Milvus에서 임베딩 검색
 
 def get_embedding(text):
     input_text = f"search_query: {text}"
