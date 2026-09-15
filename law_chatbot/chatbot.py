@@ -1,6 +1,7 @@
 import os
 import torch
 import json
+from functools import lru_cache
 from transformers import AutoTokenizer, AutoModel
 from openai import OpenAI
 from pymilvus import connections, Collection, utility
@@ -18,21 +19,24 @@ hf_token = os.getenv("huggingfacekey")
 if hf_token:
     os.environ["HF_TOKEN"] = hf_token # HuggingFace 라이브러리가 자동으로 인식
 
-client = OpenAI(api_key=os.getenv("API_KEY"))
 MILVUS_HOST = os.getenv("MILVUS_HOST", "127.0.0.1")
-MILVUS_COLLECTION = "col_1"
+MILVUS_COLLECTION = os.getenv("MILVUS_COLLECTION", "col_1")
 
 # 2. 모델 로드 (HuggingFace)
 # HF_TOKEN이 설정되어 있으므로 인증된 요청으로 처리됩니다.
 device = "cpu"
 model_name = "nomic-ai/nomic-embed-text-v2-moe"
-tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to(device)
-model.eval()
+@lru_cache(maxsize=1)
+def load_model():
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to(device)
+    model.eval()
+    return tokenizer, model
 
 # 3. Milvus에서 임베딩 검색
 
 def get_embedding(text):
+    tokenizer, model = load_model()
     input_text = f"search_query: {text}"
     inputs = tokenizer(input_text, return_tensors="pt", padding=True, truncation=True, max_length=512).to(device)
     with torch.no_grad():
@@ -44,7 +48,7 @@ def get_embedding(text):
 
 def search_milvus(query, top_k=5):
     if not connections.has_connection("default"):
-        connections.connect(alias="default", host=MILVUS_HOST, port=19530)
+        connections.connect(alias="default", host=MILVUS_HOST, port=19530, timeout=5)
     collection = Collection(MILVUS_COLLECTION)
     collection.load()
     query_vector = get_embedding(query)
@@ -54,22 +58,25 @@ def search_milvus(query, top_k=5):
         anns_field="dense",
         param={"metric_type": "L2", "params": {"nprobe": 10}},
         limit=top_k,
-        output_fields=["pk", "source", "file_hash", "page", "row"]
+        output_fields=["pk", "source", "text", "file_hash", "page", "row"]
     )
     
     hits = []
     for hit in results[0]:
         hits.append({
             "chunk_id": hit.entity.get("pk"),
-            "content": hit.entity.get("source"),
+            "content": hit.entity.get("text"),
+            "source": hit.entity.get("source"),
             "parent_id": hit.entity.get("file_hash"),
             "page": hit.entity.get("page"),
+            "row": hit.entity.get("row"),
             "score": hit.distance
         })
     return hits
 
 # 6. 답변 생성
 def ask_legal_expert(user_input, retrieved_chunks):
+    client = OpenAI(api_key=os.getenv("API_KEY") or os.getenv("OPENAI_API_KEY"), timeout=90, max_retries=1)
     context_text = "\n\n".join([f"근거: {c['content']}" for c in retrieved_chunks])
     
     system_prompt = """당신은 법률 지식을 전달하는 **'법률 데이터 검증 전문가'**입니다. 

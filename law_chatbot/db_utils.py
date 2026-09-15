@@ -19,7 +19,8 @@ def get_pg_conn():
         port=PG_PORT,
         user=PG_USER,
         password=PG_PASSWORD,
-        database=PG_DATABASE
+        database=PG_DATABASE,
+        connect_timeout=5,
     )
 
 def ensure_chatbot_logs_table():
@@ -72,21 +73,27 @@ def save_chat_log(question, answer, retrieved_chunks=None):
     except Exception as e:
         print(f"❌ DB Insert 오류: {e}")
         conn.rollback()
+        raise
     finally:
         cur.close()
         conn.close()
         
+def get_recent_logs(limit=10):
+    conn = get_pg_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, question, answer, created_at FROM chatbot_logs ORDER BY id DESC LIMIT %s", (limit,))
+            return [dict(zip(("id", "question", "answer", "created_at"), row)) for row in cur.fetchall()]
+    finally:
+        conn.close()
+
+
 def show_recent_logs(limit=10):
     """최근 대화 로그 출력 (디버깅용)"""
     try:
-        conn = get_pg_conn()
-        cur = conn.cursor()
-        cur.execute("SELECT id, question, answer, created_at FROM chatbot_logs ORDER BY id DESC LIMIT %s", (limit,))
-        rows = cur.fetchall()
+        rows = get_recent_logs(limit)
         print(f"\n최근 {limit}개 대화 로그:")
         for row in rows:
-            print(f"[{row[0]}] {row[3]}\nQ: {row[1]}\nA: {row[2]}\n---")
-        cur.close()
-        conn.close()
+            print(f"[{row['id']}] {row['created_at']}\nQ: {row['question']}\nA: {row['answer']}\n---")
     except Exception as e:
         print("DB 조회 오류:", e)
